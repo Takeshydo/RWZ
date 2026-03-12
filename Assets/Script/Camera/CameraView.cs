@@ -29,6 +29,8 @@ public class CameraView : MonoBehaviour
     void Update()
     {
         moveCam = lookActions.ReadValue<Vector2>();
+
+        moveCam.y *= -1;
         
         //Movement sur yaw 
         yaw += moveCam.x * sensibility *  Time.deltaTime;
