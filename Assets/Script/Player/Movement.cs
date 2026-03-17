@@ -1,28 +1,26 @@
-using System;
 using System.Collections;
-using System.Linq;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class Movement : MonoBehaviour
 {
     [Header("Variables")]
-    private float speed = 5f;
+    private float speed = 5.5f;
     
     //Dash
-    private float dashSpeed = 25f;
+    private float dashSpeed = 35f;
     private bool isdashing = false;
     private float dashCooldown = 1.5f;
     private bool Candash = true;
     
     //Jump
     private bool isGrounded;
-    private float JumpForce = 5f;
+    private float JumpForce = 6f;
+    private float fallMultipler = 1.5f;
     
     
     
-    private float rotateSpeed = 500f;
+    private float rotateSpeed = 5f;
     
     
     
@@ -32,9 +30,10 @@ public class Movement : MonoBehaviour
     
     [Header("Component")]
     private Rigidbody rb;
-    private Camera cam;
+    private GameObject camPivot;
 
     [Header("Input")]
+    private PlayerInput playerInput;
     private InputAction move;
     private InputAction dash;
     private InputAction jump;
@@ -43,25 +42,31 @@ public class Movement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        cam = GetComponentInChildren<Camera>();
-        move = InputSystem.actions.FindAction("Move");
-        dash = InputSystem.actions.FindAction("Dash");
-        jump = InputSystem.actions.FindAction("Jump");
+        playerInput = GetComponent<PlayerInput>();
+        camPivot = GameObject.Find("CameraPivot");
+        
+        move = playerInput.actions["Move"];
+        dash = playerInput.actions["Dash"];
+        jump = playerInput.actions["Jump"];
     }
-    
-    
+
+
     void Update()
     {
-        moveinput = new Vector3(move.ReadValue<Vector2>().x, 0f, move.ReadValue<Vector2>().y);
+        Vector2 inputEnter = move.ReadValue<Vector2>();
+        if (inputEnter.magnitude < 0.15f){
+            inputEnter = Vector3.zero;
+        }
+        moveinput = new Vector3(inputEnter.x, 0f, inputEnter.y);
         
         DirectionCalcul();
-        Rotation();
-
-        if (dash.WasPressedThisFrame() && Candash)
+       // Rotation();
+        
+        if (dash.WasPressedThisFrame() && Candash && isGrounded)
         {
             StartCoroutine(Slide());
         }
-
+        
         if (jump.WasPressedThisFrame() && isGrounded)
         {
             Jump();
@@ -71,21 +76,29 @@ public class Movement : MonoBehaviour
     void FixedUpdate()
     {
         Move();
+
+        if (rb.linearVelocity.y < 0)
+        {
+            rb.AddForce(Vector3.up * Physics.gravity.y * fallMultipler, ForceMode.Acceleration); //Fonctionne -> rend une chute plus rapide avec un Multiplicateur
+        }
     }
 
 
     void Rotation()
     {
-        if (moveinput.sqrMagnitude < 0.1f) return;
-        
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            Vector3 flatDir = new Vector3(direction.x, 0f, direction.z);
+            flatDir = flatDir.normalized;
+            
+            Quaternion targetRotation = Quaternion.LookRotation(flatDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.fixedDeltaTime);
+        } 
     }
 
     void Move()
     {
         if (isdashing) return;
-        
         Vector3 velocity = direction * speed;
         rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
     }
@@ -97,16 +110,17 @@ public class Movement : MonoBehaviour
 
     void DirectionCalcul()
     {
-        Vector3 forward = cam.transform.forward;
-        Vector3 right = cam.transform.right;
+        Vector3 forward = camPivot.transform.forward;
+        Vector3 right = camPivot.transform.right;
         
         right.y = 0;
         forward.y = 0;
-        
+            
         forward.Normalize();
         right.Normalize();
-        
+            
         direction = forward * moveinput.z + right * moveinput.x;
+        direction.Normalize();
     }
 
     IEnumerator  Slide()

@@ -342,7 +342,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4799147023858837656, guid: 0d8837f1b26d55b4c8ea40763de18b67, type: 3}
   m_PrefabInstance: {fileID: 6131464899458198259}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &414064906
+--- !u!114 &414064908
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -355,7 +355,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
   m_Actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  m_NotificationBehavior: 2
+  m_NotificationBehavior: 0
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -366,26 +366,10 @@ MonoBehaviour:
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-  m_ActionEvents:
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 5dbb2b49-f586-442b-88fa-efbb78a6219b
-    m_ActionName: 'Player/Dash[/XInputControllerWindows/buttonEast]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 070f78c6-0388-4ee0-961c-63d1f637ebf6
-    m_ActionName: 'Player/Jump[/XInputControllerWindows/buttonSouth]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: e4c5e3fc-62c6-479e-bdc1-2150c2e41232
-    m_ActionName: 'PlayerAction/Move[/XInputControllerWindows/leftStick]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: ae882032-67a5-4aae-b98d-4d3d24ffed64
-    m_ActionName: 'CameraAction/Look[/XInputControllerWindows/rightStick]'
+  m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Gamepad
-  m_DefaultActionMap: PlayerAction
+  m_DefaultActionMap: 
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!1 &470726872
@@ -2034,7 +2018,7 @@ Transform:
   m_GameObject: {fileID: 2008571931}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: -6}
+  m_LocalPosition: {x: 0, y: 1.4, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2065,14 +2049,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2007451663391877228, guid: 0d8837f1b26d55b4c8ea40763de18b67, type: 3}
-      propertyPath: m_IsTrigger
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3173948990965814816, guid: 0d8837f1b26d55b4c8ea40763de18b67, type: 3}
-      propertyPath: camPivot
-      value: 
-      objectReference: {fileID: 285412981}
     - target: {fileID: 4799147023858837656, guid: 0d8837f1b26d55b4c8ea40763de18b67, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.24
@@ -2083,7 +2059,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4799147023858837656, guid: 0d8837f1b26d55b4c8ea40763de18b67, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 23.08
+      value: 21.54
       objectReference: {fileID: 0}
     - target: {fileID: 4799147023858837656, guid: 0d8837f1b26d55b4c8ea40763de18b67, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2124,7 +2100,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1278603814795457625, guid: 0d8837f1b26d55b4c8ea40763de18b67, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 414064906}
+      addedObject: {fileID: 414064908}
   m_SourcePrefab: {fileID: 100100000, guid: 0d8837f1b26d55b4c8ea40763de18b67, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

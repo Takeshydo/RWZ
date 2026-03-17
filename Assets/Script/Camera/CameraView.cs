@@ -1,47 +1,78 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;  
 
 public class CameraView : MonoBehaviour
 {
-    [Header("Components")]
-    private Transform SpringArm; //Point d'encrage fixe
-    private Transform playerPos; 
+    [Header("Components")] 
+    public Transform springArm;
+    public Transform playerPos;
+    public Transform camPos;
+    public Transform camPivot;
+    
+    
     private InputAction lookActions;
+    private PlayerInput playerInput;
     
     [Header("Variables")]
     private Vector2 moveCam;
-
-    private float offset = 6f;
-    private float sensibility = 75f;
-    private float minPitch = -25f;
-    private float maxPitch = 50f;
+    
+    private float sensibility = 100f;
+    private float smoothSpeed = 10f;
+    private float autoFollowSpd = 5f;
     
     //Var Rotation Axe Camera
-    private float yaw;
-    private float pitch;
+    private float pitch = 20f;
+    private float yaw = 0f;
     
+    //Var SphereCast
+    private float sphereRadius = 0.3f;
+    public LayerMask collisionMask;
     void Start()
     {
-        lookActions = InputSystem.actions.FindAction("Look");
-        SpringArm = transform.parent;
+        playerInput = GetComponentInParent<PlayerInput>();
+        
+        lookActions = playerInput.actions["Look"];
     }
 
-    void Update()
+    private void Update()
     {
         moveCam = lookActions.ReadValue<Vector2>();
-
-        moveCam.y *= -1;
-        
-        //Movement sur yaw 
-        yaw += moveCam.x * sensibility *  Time.deltaTime;
-        //Movement sur pitch
-        pitch += moveCam.y * sensibility *  Time.deltaTime;
-        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        if (moveCam.magnitude < 0.15f)
+        { 
+            moveCam = Vector2.zero;
+        }
     }
 
     void LateUpdate()
     {
-        transform.eulerAngles = new Vector3(pitch, yaw, 0f);
-        transform.position = SpringArm.position - transform.forward * offset;
+        
+        float yawC = moveCam.x * sensibility * Time.deltaTime;
+        float pitchC = moveCam.y * sensibility * Time.deltaTime;
+        
+        pitch -= pitchC;
+        pitch = Mathf.Clamp(pitch, -30f, 70f);
+        yaw += yawC;
+        
+        camPivot.localRotation = Quaternion.Euler(pitch, yaw, 0f);
+        
+        Vector3 desiredPos = springArm.position;
+        Vector3 direction = desiredPos - camPivot.position;
+        float maxDistance = direction.magnitude;
+        direction.Normalize();
+        
+        RaycastHit hit;
+
+
+        if (Physics.SphereCast(camPivot.position, sphereRadius, direction, out hit, maxDistance, collisionMask))
+        {
+            camPos.position = hit.point + hit.normal * 0.2f;
+        }
+        else
+        {
+            camPos.position = Vector3.Lerp(camPos.position, desiredPos, smoothSpeed * Time.deltaTime);
+        }
+        
+        camPos.LookAt(camPivot.position);
     }
 }
