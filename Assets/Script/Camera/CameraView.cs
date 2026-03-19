@@ -8,7 +8,8 @@ public class CameraView : MonoBehaviour
     public Transform springArm;
     public Transform playerPos;
     public Transform camPos;
-    public Transform camPivot;
+    public Transform camRoot; //Root c'est Yaw || Horizontal / x
+    public Transform camPitch; // CamPivot c'est Pitch || Vertical / y
     
     
     private InputAction lookActions;
@@ -31,8 +32,9 @@ public class CameraView : MonoBehaviour
     void Start()
     {
         playerInput = GetComponentInParent<PlayerInput>();
-        
         lookActions = playerInput.actions["Look"];
+        
+        camRoot.rotation = Quaternion.Euler(0f, playerPos.eulerAngles.y, 0f);
     }
 
     private void Update()
@@ -54,17 +56,15 @@ public class CameraView : MonoBehaviour
         pitch = Mathf.Clamp(pitch, -30f, 70f);
         yaw += yawC;
         
-        camPivot.localRotation = Quaternion.Euler(pitch, yaw, 0f);
+        camRoot.rotation = Quaternion.Euler(0f, yaw, 0f);
+        camPitch.localRotation = Quaternion.Euler(pitch, 0f, 0f);
         
         Vector3 desiredPos = springArm.position;
-        Vector3 direction = desiredPos - camPivot.position;
+        Vector3 direction = desiredPos - camRoot.position;
         float maxDistance = direction.magnitude;
         direction.Normalize();
-        
         RaycastHit hit;
-
-
-        if (Physics.SphereCast(camPivot.position, sphereRadius, direction, out hit, maxDistance, collisionMask))
+        if (Physics.SphereCast(camRoot.position, sphereRadius, direction, out hit, maxDistance, collisionMask))
         {
             camPos.position = hit.point + hit.normal * 0.2f;
         }
@@ -73,6 +73,6 @@ public class CameraView : MonoBehaviour
             camPos.position = Vector3.Lerp(camPos.position, desiredPos, smoothSpeed * Time.deltaTime);
         }
         
-        camPos.LookAt(camPivot.position);
+        camPos.LookAt(camPitch.position); 
     }
 }

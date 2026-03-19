@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,19 +19,17 @@ public class Movement : MonoBehaviour
     private float JumpForce = 6f;
     private float fallMultipler = 1.5f;
     
+    //Camera
+    private float rotateSpeed = 180f; //Degres par Seconde
     
-    
-    private float rotateSpeed = 5f;
-    
-    
-    
+    //Vector 
     private Vector3 moveinput;
     private Vector3 direction;
     
     
     [Header("Component")]
     private Rigidbody rb;
-    private GameObject camPivot;
+    private GameObject camRoot;
 
     [Header("Input")]
     private PlayerInput playerInput;
@@ -42,8 +41,8 @@ public class Movement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        playerInput = GetComponent<PlayerInput>();
-        camPivot = GameObject.Find("CameraPivot");
+        playerInput = GetComponentInParent<PlayerInput>();
+        camRoot = GameObject.Find("CameraRoot");
         
         move = playerInput.actions["Move"];
         dash = playerInput.actions["Dash"];
@@ -53,14 +52,20 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
+            
         Vector2 inputEnter = move.ReadValue<Vector2>();
+        
+        if (Math.Abs(inputEnter.x) < 0.15) inputEnter.x = 0; //Calibrage de la DeadZone
+        if (Math.Abs(inputEnter.y) < 0.15) inputEnter.y = 0;
+        
         if (inputEnter.magnitude < 0.15f){
             inputEnter = Vector3.zero;
         }
+        
         moveinput = new Vector3(inputEnter.x, 0f, inputEnter.y);
         
         DirectionCalcul();
-       // Rotation();
+        Rotation();
         
         if (dash.WasPressedThisFrame() && Candash && isGrounded)
         {
@@ -79,7 +84,7 @@ public class Movement : MonoBehaviour
 
         if (rb.linearVelocity.y < 0)
         {
-            rb.AddForce(Vector3.up * Physics.gravity.y * fallMultipler, ForceMode.Acceleration); //Fonctionne -> rend une chute plus rapide avec un Multiplicateur
+            rb.AddForce(Vector3.up * (Physics.gravity.y * fallMultipler), ForceMode.Acceleration); //Fonctionne -> rend une chute plus rapide avec un Multiplicateur
         }
     }
 
@@ -88,11 +93,11 @@ public class Movement : MonoBehaviour
     {
         if (direction.sqrMagnitude > 0.001f)
         {
-            Vector3 flatDir = new Vector3(direction.x, 0f, direction.z);
-            flatDir = flatDir.normalized;
+            Vector3 flatDir = new Vector3(direction.x, 0f, direction.z).normalized;
             
             Quaternion targetRotation = Quaternion.LookRotation(flatDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.fixedDeltaTime);
+            
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
         } 
     }
 
@@ -110,17 +115,16 @@ public class Movement : MonoBehaviour
 
     void DirectionCalcul()
     {
-        Vector3 forward = camPivot.transform.forward;
-        Vector3 right = camPivot.transform.right;
-        
-        right.y = 0;
-        forward.y = 0;
-            
-        forward.Normalize();
-        right.Normalize();
-            
-        direction = forward * moveinput.z + right * moveinput.x;
-        direction.Normalize();
+       Vector3 forward = camRoot.transform.forward;
+       Vector3 right = camRoot.transform.right;
+       
+       forward.y = 0;
+       right.y = 0;
+       
+       forward.Normalize();
+       right.Normalize();
+       
+       direction = forward * moveinput.z + right * moveinput.x;
     }
 
     IEnumerator  Slide()
